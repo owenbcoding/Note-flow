@@ -27,10 +27,15 @@ export default async function NewNotePage() {
   })
 
   // Get user's notebooks for selection
-  const notebooks = await prisma.notebook.findMany({
+  const notebooksRaw = await prisma.notebook.findMany({
     where: { userId: dbUser.id },
     orderBy: { title: 'asc' },
   })
+  const notebooks = notebooksRaw.map((nb) => ({
+    id: nb.id,
+    title: nb.title,
+    color: nb.color ?? undefined,
+  }))
 
   return (
     <div className="min-h-screen bg-background">

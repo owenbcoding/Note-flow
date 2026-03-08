@@ -72,19 +72,20 @@ export async function POST(request: NextRequest) {
       usage: completion.usage 
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenAI API error:', error)
     
     // Provide more specific error messages
     let errorMessage = 'Failed to generate text'
-    if (error?.status === 401) {
+    const err = error as { status?: number; message?: string }
+    if (err?.status === 401) {
       errorMessage = 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local'
-    } else if (error?.status === 429) {
+    } else if (err?.status === 429) {
       errorMessage = 'OpenAI API rate limit exceeded. Please try again later.'
-    } else if (error?.status === 500) {
+    } else if (err?.status === 500) {
       errorMessage = 'OpenAI API service error. Please try again later.'
-    } else if (error?.message) {
-      errorMessage = error.message
+    } else if (err?.message) {
+      errorMessage = err.message
     }
     
     return NextResponse.json(

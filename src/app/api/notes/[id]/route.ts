@@ -3,10 +3,11 @@ import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     
     if (!user) {
@@ -24,7 +25,7 @@ export async function GET(
 
     const note = await prisma.note.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: dbUser.id,
       },
       include: {
@@ -48,9 +49,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     
     if (!user) {
@@ -77,7 +79,7 @@ export async function PUT(
 
     const note = await prisma.note.updateMany({
       where: {
-        id: params.id,
+        id,
         userId: dbUser.id,
       },
       data: {
@@ -92,7 +94,7 @@ export async function PUT(
     }
 
     const updatedNote = await prisma.note.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         notebook: true,
       },
@@ -109,10 +111,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     
     if (!user) {
@@ -130,7 +133,7 @@ export async function DELETE(
 
     const note = await prisma.note.deleteMany({
       where: {
-        id: params.id,
+        id,
         userId: dbUser.id,
       },
     })

@@ -1,13 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server'
 import { isClerkEnabled } from '@/lib/auth'
 
 // Enable Clerk only when keys are present; otherwise, pass-through
-export default async function middleware(req: Request) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   if (isClerkEnabled()) {
     const { clerkMiddleware } = await import('@clerk/nextjs/server')
     const run = clerkMiddleware()
-    // @ts-ignore - Clerk types expect NextRequest; compatible at runtime
-    return run(req as any)
+    return run(req, event)
   }
   return NextResponse.next()
 }

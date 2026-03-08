@@ -5,7 +5,7 @@ import { createOrUpdateUser, deleteUser } from '@/lib/user-sync'
 
 export async function POST(req: NextRequest) {
   // Get the headers
-  const headerPayload = headers()
+  const headerPayload = await headers()
   const svix_id = headerPayload.get('svix-id')
   const svix_timestamp = headerPayload.get('svix-timestamp')
   const svix_signature = headerPayload.get('svix-signature')
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
-    })
+    }) as ClerkEvent
   } catch (err) {
     console.error('Error verifying webhook:', err)
     return new Response('Error occured', {
@@ -61,10 +61,10 @@ export async function POST(req: NextRequest) {
     try {
       await createOrUpdateUser({
         id,
-        emailAddresses: email_addresses,
+        emailAddresses: email_addresses.map((e) => ({ emailAddress: e.email_address })),
         firstName: first_name,
         lastName: last_name,
-        imageUrl: image_url,
+        imageUrl: image_url ?? undefined,
       })
     } catch (err) {
       console.error('Error creating/updating user:', err)
