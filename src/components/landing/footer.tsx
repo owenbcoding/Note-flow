@@ -57,15 +57,15 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
             {/* Brand Section */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
+            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+              <Link href="/" className="flex items-center space-x-2 mb-4 w-fit hover:opacity-90 transition-opacity">
                 <NotebookPen className="h-8 w-8 text-primary" />
                 <span className="text-2xl font-bold">NoteFlow</span>
-              </div>
+              </Link>
               <p className="text-muted-foreground mb-6 max-w-md">
-                The intelligent note-taking app that helps you capture, organize, and find your thoughts effortlessly. 
+                The intelligent note-taking app that helps you capture, organize, and find your thoughts effortlessly.
                 Built for modern productivity with AI-powered insights.
               </p>
               <div className="flex space-x-4">
@@ -86,7 +86,7 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Links Sections */}
+            {/* Links: Product, Company, Resources, Legal (Legal to the right of Resources) */}
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title}>
                 <h3 className="font-semibold mb-4">{title}</h3>
