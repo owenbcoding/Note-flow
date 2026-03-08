@@ -1,4 +1,4 @@
-# CC Note‑Taking App
+# Note‑Taking App
 
 A lightweight note‑taking web app built with Next.js and TypeScript. This repository currently contains the application scaffold; domain features will be iterated on here.
 
