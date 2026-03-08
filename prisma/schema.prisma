@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // User model for authentication and user management
@@ -21,12 +21,27 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  notes     Note[]
-  notebooks Notebook[]
-  tags      Tag[]
-  sessions  Session[]
+  notes      Note[]
+  notebooks  Notebook[]
+  tags       Tag[]
+  sessions   Session[]
+  syncTokens SyncToken[]
 
   @@map("users")
+}
+
+// Sync token for CLI/script auth (e.g. sync-notes-from-dir). One token per user.
+model SyncToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   // hash of the secret token (never store plaintext)
+  name      String?  @default("Sync script")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("sync_tokens")
 }
 
 // Session model for user sessions (optional - Clerk handles most sessions)
