@@ -125,12 +125,18 @@ export function Features() {
               Join thousands of users who have already revolutionized their productivity with NoteFlow.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                Start Free Trial
-              </button>
-              <button className="border border-border px-8 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
-                View Pricing
-              </button>
+              <a
+                href="/signup"
+                className="inline-flex justify-center bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
+                Get started free
+              </a>
+              <a
+                href="#faq"
+                className="inline-flex justify-center border border-border px-8 py-3 rounded-lg font-medium hover:bg-muted transition-colors"
+              >
+                Read FAQ
+              </a>
             </div>
           </div>
         </div>

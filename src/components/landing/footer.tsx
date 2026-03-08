@@ -16,7 +16,7 @@ import {
 const footerLinks = {
   Product: [
     { name: "Features", href: "#features" },
-    { name: "Pricing", href: "#pricing" },
+    { name: "Free forever", href: "#features" },
     { name: "API", href: "/api" },
     { name: "Integrations", href: "/integrations" }
   ],

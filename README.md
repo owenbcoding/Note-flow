@@ -6,12 +6,12 @@ A lightweight note‑taking web app built with Next.js and TypeScript. This repo
 
 Prerequisites: Node.js 18+ and your preferred package manager (npm, yarn, pnpm, or bun).
 
-Install dependencies and start the dev server:
+Copy `.env.example` to `.env` and set at least `DATABASE_URL` (e.g. [Neon](https://neon.tech) free tier) and Clerk keys. Then:
 
 ```bash
 npm install
 npx prisma generate
-npx prisma db push
+npx prisma migrate deploy
 npm run dev
 ```
 

@@ -25,11 +25,11 @@ const faqs = [
   },
   {
     question: "How much does it cost?",
-    answer: "We offer a free tier with basic features and a premium subscription starting at $9.99/month for advanced features like AI organization, unlimited storage, and team collaboration tools."
+    answer: "NoteFlow is free. All features—including AI-powered organization, search, encryption, sync, and collaboration—are available at no cost. We believe everyone deserves great tools without a paywall."
   },
   {
     question: "Can I collaborate with others on notes?",
-    answer: "Yes! With our premium plan, you can share notes with team members, collaborate in real-time, and manage permissions. Perfect for team projects, meeting notes, and shared knowledge bases."
+    answer: "Yes! You can share notes with others, collaborate in real-time, and manage permissions. Perfect for team projects, meeting notes, and shared knowledge bases. All included for free."
   },
   {
     question: "What file types can I attach to notes?",
