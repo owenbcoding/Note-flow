@@ -12,34 +12,34 @@ export function Hero() {
           <div className="flex justify-center mb-8">
             <Badge variant="secondary" className="px-4 py-2 text-sm">
               <Sparkles className="w-4 h-4 mr-2" />
-              New: AI-powered note organization
+              Free forever • Sync from NOTES or GitHub
             </Badge>
           </div>
 
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Take notes that{" "}
+            Your notes,{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              actually matter
+              one place
             </span>
           </h1>
 
           {/* Subheading */}
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Organize your thoughts, capture ideas instantly, and never lose important information again. 
-            Built for modern productivity with AI-powered insights.
+            A free multi-user app. Import your NOTES directory or GitHub repo into your profile—or write in the app. 
+            AI-powered organization, no paid tier.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button size="lg" className="text-lg px-8 py-6" asChild>
               <Link href="/signup">
-                Start taking notes
+                Get started free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-              <Link href="#demo">Watch demo</Link>
+              <Link href="#features">See how it works</Link>
             </Button>
           </div>
 
@@ -48,16 +48,16 @@ export function Hero() {
             <div className="flex flex-col items-center">
               <div className="flex items-center text-2xl font-bold text-primary mb-2">
                 <Users className="w-6 h-6 mr-2" />
-                10K+
+                Free
               </div>
-              <p className="text-sm text-muted-foreground">Active users</p>
+              <p className="text-sm text-muted-foreground">Multi-user app</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center text-2xl font-bold text-primary mb-2">
                 <Zap className="w-6 h-6 mr-2" />
-                99.9%
+                Sync
               </div>
-              <p className="text-sm text-muted-foreground">Uptime</p>
+              <p className="text-sm text-muted-foreground">NOTES or GitHub</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center text-2xl font-bold text-primary mb-2">
