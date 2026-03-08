@@ -26,18 +26,18 @@ export function Navbar() {
             <Link href="#faq" className="text-sm font-medium hover:text-primary transition-colors">
               FAQ
             </Link>
-            <Link href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">
-              Pricing
+            <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">
+              Free forever
             </Link>
           </div>
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" asChild>
-              <Link href="/login">Sign In</Link>
+              <Link href="/sign-in">Sign In</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Get Started</Link>
+              <Link href="/sign-up">Get Started</Link>
             </Button>
           </div>
 
@@ -72,18 +72,18 @@ export function Navbar() {
                 FAQ
               </Link>
               <Link
-                href="#pricing"
+                href="#features"
                 className="block px-3 py-2 text-base font-medium hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Pricing
+                Free forever
               </Link>
               <div className="pt-4 space-y-2">
                 <Button variant="ghost" className="w-full justify-start" asChild>
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
                 <Button className="w-full" asChild>
-                  <Link href="/signup">Get Started</Link>
+                  <Link href="/sign-up">Get Started</Link>
                 </Button>
               </div>
             </div>
