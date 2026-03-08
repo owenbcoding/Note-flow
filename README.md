@@ -2,6 +2,12 @@
 
 A lightweight note‑taking web app built with Next.js and TypeScript. This repository currently contains the application scaffold; domain features will be iterated on here.
 
+## What you can do
+
+You can connect a GitHub repository that uses Markdown (`.md`) or MDX (`.mdx`) files to the app. Your notes are stored and accessible online, so you can view and manage them from anywhere—no need to keep files only on your local machine or view on the go with your mobile 
+
+what we recommend you to do is when you are learning is to take your notes down in a app such as Notion or obsidian which alows you to export the notes as a markdown file and then create a repo and upload the mark down files to that repo open up noteflow then connect that repo with the notes you added to to store them online.
+
 ## Quick Start
 
 Prerequisites: Node.js 18+ and your preferred package manager (npm, yarn, pnpm, or bun).
@@ -50,49 +56,4 @@ command to setting up the project from scratch
 - npx create-next-app@latest
 - cursor .
 - npm run dev
-
-### First Prompt :
-You are a professional software developer with 10 years of frontend and ux experience. Take a look at my nextjs setup. I want to create a simple note-taking app and right now i want to focus on landing side of things.
-
-Modify my root page.tsx.
-
-Create a component folder to store all components, make sure you create relevant folders inside of this, example since we’re working on landing, call the first folder landing and create components in those. For now focus only on landing and create a landing page with reference design. I basically want an Hero, Features, FAQ, Navbar, footer. Use my shadcn components for design purposes. 
-
-### Next Prompt :
-Shadcn is already installed in my code, but get components you’ll need.
-
-Then takea a look at how Neon works: https://neon.com/ ( but dont prompt it).
-
-### Next Prompt : 
-npx prisma generate
-
-npx prisma db push
-
-Then create and up a clerk account https://clerk.com/docs/nextjs/getting-started/quickstart
-
-### Next prompt!
-Create a complete notes dashboard with CRUD operations. I want to add, edit, and delete notes with title, content, and dates. Sort by newest first.
-Include:
-
-API routes: /api/notes and /api/notes/[id]
-Components: NoteCard, NoteDialog, updated dashboard page
-Prisma Note model with userId relation
-Install: npm install clsx tailwind-merge and npx shadcn add textarea dialog
-Add cn utility function to utils.ts
-Grid layout (responsive), loading states, error handling
-
-Use shadcn components and follow our design style. Make it complete and working in one go.
-
-### Last prompt for this project
-import OpenAI from "openai";
-const client = new OpenAI();
-
-const response = await client.responses.create({
-  model: "gpt-5",
-  input: "Write a short bedtime story about a unicorn.",
-});
-
-console.log(response.output_text);
-
-Above is the documentation for OPENAI API, I want to have ai text generation capabilities inside my application, help me integrate this api, and give a button to user so that they can generate their notes with ai.
 
