@@ -7,7 +7,7 @@ import { Menu, X, NotebookPen, LayoutDashboard } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 type NavbarProps = {
-  /** When false (Clerk disabled / dev), show Dashboard link so the app is usable without sign-in */
+  /** When false (Clerk disabled), show Sign In / Get Started only */
   clerkEnabled?: boolean;
 };
 
@@ -75,11 +75,11 @@ function NavbarUI({
   );
 }
 
-/** Uses Clerk only when enabled; safe to render when Clerk is disabled */
+/** Uses Clerk only when enabled. When Clerk is disabled, show Sign In / Get Started. */
 export function Navbar({ clerkEnabled = true }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   if (!clerkEnabled) {
-    return <NavbarUI showDashboard={true} isOpen={isOpen} setIsOpen={setIsOpen} />;
+    return <NavbarUI showDashboard={false} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
   return <NavbarWithClerk isOpen={isOpen} setIsOpen={setIsOpen} />;
 }
