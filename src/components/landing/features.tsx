@@ -32,42 +32,43 @@ const features = [
     description: "Access your notes anywhere, anytime. Sync across devices and import from GitHub—your notes follow you wherever you go.",
     badge: null
   },
-  {
-    icon: Search,
-    title: "Lightning-Fast Search",
-    description: "Find any note instantly with our advanced search that understands context and meaning, not just keywords.",
-    badge: "Coming Soon"
-  },
-  {
-    icon: Shield,
-    title: "End-to-End Encryption",
-    description: "Your notes are protected with military-grade encryption. Only you can access your thoughts and ideas.",
-    badge: "Coming Soon"
-  },
-  {
-    icon: Zap,
-    title: "Instant Capture",
-    description: "Capture ideas the moment they strike with our quick-add feature and voice-to-text capabilities.",
-    badge: "Coming Soon"
-  },
-  {
-    icon: Users,
-    title: "Collaborative Notes",
-    description: "Share and collaborate on notes with your team. Perfect for meetings, projects, and brainstorming sessions.",
-    badge: "Coming Soon"
-  },
-  {
-    icon: Lock,
-    title: "Privacy First",
-    description: "We believe in your privacy. Your data stays yours, with no ads, no tracking, and no data selling.",
-    badge: "Coming Soon"
-  },
-  {
-    icon: Cloud,
-    title: "Automatic Backup",
-    description: "Never lose your notes again. Automatic cloud backup ensures your ideas are always safe and accessible.",
-    badge: "Coming Soon"
-  }
+  // Coming soon – uncomment when ready to show
+  // {
+  //   icon: Search,
+  //   title: "Lightning-Fast Search",
+  //   description: "Find any note instantly with our advanced search that understands context and meaning, not just keywords.",
+  //   badge: "Coming Soon"
+  // },
+  // {
+  //   icon: Shield,
+  //   title: "End-to-End Encryption",
+  //   description: "Your notes are protected with military-grade encryption. Only you can access your thoughts and ideas.",
+  //   badge: "Coming Soon"
+  // },
+  // {
+  //   icon: Zap,
+  //   title: "Instant Capture",
+  //   description: "Capture ideas the moment they strike with our quick-add feature and voice-to-text capabilities.",
+  //   badge: "Coming Soon"
+  // },
+  // {
+  //   icon: Users,
+  //   title: "Collaborative Notes",
+  //   description: "Share and collaborate on notes with your team. Perfect for meetings, projects, and brainstorming sessions.",
+  //   badge: "Coming Soon"
+  // },
+  // {
+  //   icon: Lock,
+  //   title: "Privacy First",
+  //   description: "We believe in your privacy. Your data stays yours, with no ads, no tracking, and no data selling.",
+  //   badge: "Coming Soon"
+  // },
+  // {
+  //   icon: Cloud,
+  //   title: "Automatic Backup",
+  //   description: "Never lose your notes again. Automatic cloud backup ensures your ideas are always safe and accessible.",
+  //   badge: "Coming Soon"
+  // },
 ];
 
 export function Features() {
