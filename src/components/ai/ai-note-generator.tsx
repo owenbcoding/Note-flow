@@ -11,9 +11,11 @@ import { AIService } from '@/lib/ai-service'
 interface AINoteGeneratorProps {
   onGeneratedContent?: (content: string) => void
   className?: string
+  /** When true, output is not rendered here - parent should display it (e.g. above Recent Notes) */
+  hideOutput?: boolean
 }
 
-export function AINoteGenerator({ onGeneratedContent, className }: AINoteGeneratorProps) {
+export function AINoteGenerator({ onGeneratedContent, className, hideOutput }: AINoteGeneratorProps) {
   const [prompt, setPrompt] = useState('')
   const [noteType, setNoteType] = useState<'general' | 'meeting' | 'study' | 'idea' | 'journal'>('general')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -26,6 +28,7 @@ export function AINoteGenerator({ onGeneratedContent, className }: AINoteGenerat
 
     setIsGenerating(true)
     setGeneratedContent('')
+    if (onGeneratedContent) onGeneratedContent('')
     setError(null)
 
     try {
@@ -134,7 +137,7 @@ export function AINoteGenerator({ onGeneratedContent, className }: AINoteGenerat
           </div>
         )}
 
-        {generatedContent && (
+        {generatedContent && !hideOutput && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Generated Content</label>
