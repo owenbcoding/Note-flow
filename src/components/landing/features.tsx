@@ -17,37 +17,7 @@ const features = [
   {
     icon: Brain,
     title: "AI-Powered Organization",
-    description: "Automatically categorize and tag your notes with intelligent AI that learns from your writing patterns.",
-    badge: "New"
-  },
-  {
-    icon: Search,
-    title: "Lightning-Fast Search",
-    description: "Find any note instantly with our advanced search that understands context and meaning, not just keywords.",
-    badge: null
-  },
-  {
-    icon: Shield,
-    title: "End-to-End Encryption",
-    description: "Your notes are protected with military-grade encryption. Only you can access your thoughts and ideas.",
-    badge: null
-  },
-  {
-    icon: Smartphone,
-    title: "Cross-Platform Sync",
-    description: "Access your notes anywhere, anytime. Seamlessly sync across all your devices in real-time.",
-    badge: null
-  },
-  {
-    icon: Zap,
-    title: "Instant Capture",
-    description: "Capture ideas the moment they strike with our quick-add feature and voice-to-text capabilities.",
-    badge: null
-  },
-  {
-    icon: Users,
-    title: "Collaborative Notes",
-    description: "Share and collaborate on notes with your team. Perfect for meetings, projects, and brainstorming sessions.",
+    description: "Generate well-structured notes with AI. Choose from meeting notes, study notes, ideas, journal entries, and more—all organized by type.",
     badge: null
   },
   {
@@ -57,16 +27,46 @@ const features = [
     badge: null
   },
   {
+    icon: Smartphone,
+    title: "Cross-Platform Sync",
+    description: "Access your notes anywhere, anytime. Sync across devices and import from GitHub—your notes follow you wherever you go.",
+    badge: null
+  },
+  {
+    icon: Search,
+    title: "Lightning-Fast Search",
+    description: "Find any note instantly with our advanced search that understands context and meaning, not just keywords.",
+    badge: "Coming Soon"
+  },
+  {
+    icon: Shield,
+    title: "End-to-End Encryption",
+    description: "Your notes are protected with military-grade encryption. Only you can access your thoughts and ideas.",
+    badge: "Coming Soon"
+  },
+  {
+    icon: Zap,
+    title: "Instant Capture",
+    description: "Capture ideas the moment they strike with our quick-add feature and voice-to-text capabilities.",
+    badge: "Coming Soon"
+  },
+  {
+    icon: Users,
+    title: "Collaborative Notes",
+    description: "Share and collaborate on notes with your team. Perfect for meetings, projects, and brainstorming sessions.",
+    badge: "Coming Soon"
+  },
+  {
     icon: Lock,
     title: "Privacy First",
     description: "We believe in your privacy. Your data stays yours, with no ads, no tracking, and no data selling.",
-    badge: null
+    badge: "Coming Soon"
   },
   {
     icon: Cloud,
     title: "Automatic Backup",
     description: "Never lose your notes again. Automatic cloud backup ensures your ideas are always safe and accessible.",
-    badge: null
+    badge: "Coming Soon"
   }
 ];
 
@@ -80,9 +80,8 @@ export function Features() {
             Features
           </Badge>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
-            Everything you need to{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              organize your thoughts
+              Organize your thoughts
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -113,32 +112,6 @@ export function Features() {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-8 lg:p-12">
-            <h3 className="text-2xl lg:text-3xl font-bold mb-4">
-              Ready to transform your note-taking?
-            </h3>
-            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Join thousands of users who have already revolutionized their productivity with NoteFlow.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/signup"
-                className="inline-flex justify-center bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              >
-                Get started free
-              </a>
-              <a
-                href="#faq"
-                className="inline-flex justify-center border border-border px-8 py-3 rounded-lg font-medium hover:bg-muted transition-colors"
-              >
-                Read FAQ
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </section>
