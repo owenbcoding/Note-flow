@@ -7,6 +7,8 @@ import { NotebookPen, Plus, FileText, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { AINoteGenerator } from '@/components/ai/ai-note-generator'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Dashboard() {
   const user = await getCurrentUser()
   
