@@ -2,14 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { 
   Brain, 
-  Search, 
-  Shield, 
   Smartphone, 
-  Zap, 
-  Users,
   FileText,
-  Lock,
-  Cloud,
   Sparkles
 } from "lucide-react";
 

@@ -4,25 +4,25 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  NotebookPen, 
-  Twitter, 
-  Github, 
-  Linkedin, 
+import {
+  NotebookPen,
+  Twitter,
+  Github,
+  Linkedin,
   Mail,
-  ArrowUp
+  ArrowUp,
 } from "lucide-react";
 
 const socialLinks = [
   { name: "Twitter", href: "https://twitter.com", icon: Twitter },
   { name: "GitHub", href: "https://github.com", icon: Github },
   { name: "LinkedIn", href: "https://linkedin.com", icon: Linkedin },
-  { name: "Email", href: "mailto:support@noteflow.com", icon: Mail }
+  { name: "Email", href: "mailto:support@noteflow.com", icon: Mail },
 ];
 
 export function Footer() {
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -50,7 +50,11 @@ export function Footer() {
                     asChild
                     className="hover:bg-primary/10"
                   >
-                    <Link href={social.href} target="_blank" rel="noopener noreferrer">
+                    <Link
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <social.icon className="h-5 w-5" />
                       <span className="sr-only">{social.name}</span>
                     </Link>
@@ -89,7 +93,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <p className="text-sm text-muted-foreground">
-                © 2024 NoteFlow. All rights reserved.
+                © 2026 NoteFlow. All rights reserved.
               </p>
               <div className="flex items-center space-x-4">
                 <Badge variant="outline" className="text-xs">
@@ -98,7 +102,7 @@ export function Footer() {
                 </Badge>
               </div>
             </div>
-            
+
             <Button
               variant="ghost"
               size="sm"

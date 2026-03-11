@@ -6,6 +6,8 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { NotesList } from '@/components/notes/notes-list'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NotesPage() {
   const user = await getCurrentUser()
   

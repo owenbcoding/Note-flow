@@ -36,6 +36,8 @@ async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
   throw lastError ?? new Error('Database connection failed')
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function Dashboard() {
   const user = await getCurrentUser()
   

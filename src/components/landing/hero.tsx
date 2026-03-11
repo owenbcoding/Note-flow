@@ -63,7 +63,7 @@ export function Hero() {
                 <Sparkles className="w-6 h-6 mr-2" />
                 AI
               </div>
-              <p className="text-sm text-muted-foreground">Powered</p>
+              <p className="text-sm text-muted-foreground">AI-powered</p>
             </div>
           </div>
         </div>
