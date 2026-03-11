@@ -3,9 +3,38 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { NotebookPen, Plus, FileText, BookOpen } from 'lucide-react'
+import { NotebookPen, FileText, BookOpen, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import { AINoteGenerator } from '@/components/ai/ai-note-generator'
+import { DashboardGrid } from '@/components/dashboard/dashboard-grid'
+import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+
+function isConnectionError(e: unknown): boolean {
+  if (e instanceof Error) {
+    if (e.name === 'PrismaClientInitializationError') return true
+    if (e.message.includes("Can't reach database server")) return true
+  }
+  return false
+}
+
+async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
+  const delaysMs = [0, 1000, 2000, 4000, 8000]
+  let lastError: unknown
+
+  for (const delayMs of delaysMs) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+
+    try {
+      return await fn()
+    } catch (e) {
+      if (!isConnectionError(e)) throw e
+      lastError = e
+    }
+  }
+
+  throw lastError ?? new Error('Database connection failed')
+}
 
 export default async function Dashboard() {
   const user = await getCurrentUser()
@@ -14,45 +43,102 @@ export default async function Dashboard() {
     redirect('/')
   }
 
-  // Get or create user in database
-  const dbUser = await prisma.user.upsert({
-    where: { clerkId: user.id },
-    update: {
-      email: user.emailAddresses[0]?.emailAddress || '',
-      name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
-      avatar: user.imageUrl,
-    },
-    create: {
-      clerkId: user.id,
-      email: user.emailAddresses[0]?.emailAddress || '',
-      name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
-      avatar: user.imageUrl,
-    },
-  })
+  try {
+    const data = await withDbRetry(async () => {
+    // Get or create user in database
+    const dbUser = await prisma.user.upsert({
+      where: { clerkId: user.id },
+      update: {
+        email: user.emailAddresses[0]?.emailAddress || '',
+        name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
+        avatar: user.imageUrl,
+      },
+      create: {
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
+        avatar: user.imageUrl,
+      },
+    })
 
-  // Get user's notes and notebooks
-  const [notes, notebooks] = await Promise.all([
-    prisma.note.findMany({
-      where: { userId: dbUser.id },
+    const IMPORTED_DESC = 'Imported from GitHub'
+
+    // Notebooks that hold GitHub imports — their notes must not appear in Recent Notes
+    const importedNotebookIds = (
+      await prisma.notebook.findMany({
+        where: { userId: dbUser.id, description: IMPORTED_DESC },
+        select: { id: true },
+      })
+    ).map((n) => n.id)
+
+    // Recent Notes: exclude notes that live only in imported-repo notebooks (those stay in Notebook section only)
+    const notes = await prisma.note.findMany({
+      where: {
+        userId: dbUser.id,
+        ...(importedNotebookIds.length > 0
+          ? {
+              OR: [
+                { notebookId: null },
+                { notebookId: { notIn: importedNotebookIds } },
+              ],
+            }
+          : {}),
+      },
       orderBy: { updatedAt: 'desc' },
       take: 5,
-    }),
-    prisma.notebook.findMany({
+    })
+
+    const notebooks = await prisma.notebook.findMany({
       where: { userId: dbUser.id },
       orderBy: { updatedAt: 'desc' },
-      take: 3,
-    }),
-  ])
+      take: 8,
+    })
 
-  return (
+    // All notes inside imported-repo notebooks — shown only as clickable files under that notebook
+    const importedNotesByNotebook =
+      importedNotebookIds.length > 0
+        ? await prisma.note.findMany({
+            where: { userId: dbUser.id, notebookId: { in: importedNotebookIds } },
+            select: { id: true, title: true, notebookId: true },
+            orderBy: { title: 'asc' },
+          })
+        : []
+
+    const notesByNotebookId = new Map<string, { id: string; title: string }[]>()
+    for (const n of importedNotesByNotebook) {
+      if (!n.notebookId) continue
+      const list = notesByNotebookId.get(n.notebookId) ?? []
+      list.push({ id: n.id, title: n.title })
+      notesByNotebookId.set(n.notebookId, list)
+    }
+
+    const notebooksForGrid = notebooks.map((nb) => ({
+      id: nb.id,
+      title: nb.title,
+      description: nb.description,
+      color: nb.color,
+      importedNotes:
+        nb.description === IMPORTED_DESC
+          ? (notesByNotebookId.get(nb.id) ?? [])
+          : [],
+    }))
+      return { notes, notebooksForGrid }
+    })
+
+    return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user.firstName || 'User'}!</h1>
-          <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening with your notes today.
-          </p>
+        {/* Header with Sign out aligned to right edge (above Recent Activity) */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user.firstName || 'User'}!</h1>
+            <p className="text-muted-foreground">
+              Here&apos;s what&apos;s happening with your notes today.
+            </p>
+          </div>
+          <div className="sm:shrink-0">
+            <DashboardHeader />
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -63,7 +149,7 @@ export default async function Dashboard() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{notes.length}</div>
+              <div className="text-2xl font-bold">{data.notes.length}</div>
               <p className="text-xs text-muted-foreground">
                 +2 from last week
               </p>
@@ -76,7 +162,7 @@ export default async function Dashboard() {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{notebooks.length}</div>
+              <div className="text-2xl font-bold">{data.notebooksForGrid.length}</div>
               <p className="text-xs text-muted-foreground">
                 +1 from last week
               </p>
@@ -97,100 +183,49 @@ export default async function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* AI Note Generator */}
-          <div className="lg:col-span-1">
-            <AINoteGenerator />
-          </div>
-
-          <div className="lg:col-span-2 space-y-8">
-            {/* Recent Notes */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Notes</CardTitle>
-                <CardDescription>
-                  Your latest notes and thoughts
-                </CardDescription>
-              </CardHeader>
-            <CardContent>
-              {notes.length > 0 ? (
-                <div className="space-y-4">
-                  {notes.map((note) => (
-                    <div key={note.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium">{note.title}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {note.content}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(note.updatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4">No notes yet</p>
-                  <Button asChild>
-                    <Link href="/notes/new">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create your first note
-                    </Link>
-                  </Button>
-                </div>
-              )}
-              </CardContent>
-            </Card>
-
-            {/* Notebooks */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Notebooks</CardTitle>
-                <CardDescription>
-                  Organize your notes into collections
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {notebooks.length > 0 ? (
-                  <div className="space-y-4">
-                    {notebooks.map((notebook) => (
-                      <div key={notebook.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div 
-                            className="w-4 h-4 rounded-full" 
-                            style={{ backgroundColor: notebook.color || '#3b82f6' }}
-                          />
-                          <div>
-                            <h4 className="font-medium">{notebook.title}</h4>
-                            {notebook.description && (
-                              <p className="text-sm text-muted-foreground">
-                                {notebook.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">No notebooks yet</p>
-                    <Button asChild>
-                      <Link href="/notebooks/new">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create your first notebook
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <DashboardGrid notes={data.notes} notebooks={data.notebooksForGrid} />
       </div>
     </div>
-  )
+    )
+  } catch (e) {
+    if (isConnectionError(e)) {
+      return (
+        <div className="min-h-screen bg-background">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Welcome back, {user.firstName || 'User'}!</h1>
+                <p className="text-muted-foreground">
+                  Here&apos;s what&apos;s happening with your notes today.
+                </p>
+              </div>
+              <div className="sm:shrink-0">
+                <DashboardHeader />
+              </div>
+            </div>
+
+            <Card className="mb-8 border-amber-300/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-muted-foreground" />
+                  Database temporarily unavailable
+                </CardTitle>
+                <CardDescription>
+                  Dashboard is running in limited mode until the DB connection recovers.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/dashboard">Retry connection</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <DashboardGrid notes={[]} notebooks={[]} />
+          </div>
+        </div>
+      )
+    }
+    throw e
+  }
 }
