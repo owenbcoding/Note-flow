@@ -3,6 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { NoteView } from '@/components/notes/note-view'
 
+export const dynamic = 'force-dynamic'
+
 interface NotePageProps {
   params: Promise<{ id: string }>
 }

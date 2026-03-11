@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { NewNoteForm } from '@/components/notes/new-note-form'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewNotePage() {
   const user = await getCurrentUser()
   
