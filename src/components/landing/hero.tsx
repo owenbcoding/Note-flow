@@ -25,9 +25,8 @@ export function Hero() {
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            A free multi-user app. Import your NOTES directory or GitHub repo into your profile—or write in the app. 
-            AI-powered organization, no paid tier.
+a          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            A free multi-user app. Import your NOTES directory or GitHub repo into your profile—or write in the app. AI-powered organization, no paid tier.
           </p>
 
           {/* CTA Buttons */}
