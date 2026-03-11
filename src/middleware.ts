@@ -6,7 +6,22 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
   if (isClerkEnabled()) {
     const { clerkMiddleware } = await import('@clerk/nextjs/server')
     const run = clerkMiddleware()
-    return run(req, event)
+    const response = await run(req, event)
+
+    // In local/dev, stale Clerk dev-browser cookies can produce a 500 response
+    // and keep the app in a broken loading state. Let public requests continue.
+    if (!response) {
+      return NextResponse.next()
+    }
+
+    if (
+      response.status >= 500 &&
+      response.headers.get('x-clerk-auth-reason') === 'dev-browser-missing'
+    ) {
+      return NextResponse.next()
+    }
+
+    return response
   }
   return NextResponse.next()
 }
