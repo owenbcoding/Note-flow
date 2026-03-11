@@ -13,33 +13,6 @@ import {
   ArrowUp
 } from "lucide-react";
 
-const footerLinks = {
-  Product: [
-    { name: "Features", href: "#features" },
-    { name: "Free forever", href: "#features" },
-    { name: "API", href: "/api" },
-    { name: "Integrations", href: "/integrations" }
-  ],
-  Company: [
-    { name: "About", href: "/about" },
-    { name: "Blog", href: "/blog" },
-    { name: "Careers", href: "/careers" },
-    { name: "Press", href: "/press" }
-  ],
-  Resources: [
-    { name: "Documentation", href: "/docs" },
-    { name: "Help Center", href: "/help" },
-    { name: "Community", href: "/community" },
-    { name: "Templates", href: "/templates" }
-  ],
-  Legal: [
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookies" },
-    { name: "GDPR", href: "/gdpr" }
-  ]
-};
-
 const socialLinks = [
   { name: "Twitter", href: "https://twitter.com", icon: Twitter },
   { name: "GitHub", href: "https://github.com", icon: Github },
@@ -53,18 +26,18 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-muted/30 border-t">
+    <footer className="bg-muted/30 border-t mt-10">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
+        {/* Main Footer Content: NoteFlow + Newsletter centered row */}
         <div className="py-16">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
-            {/* Brand Section */}
-            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+          <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-12 md:gap-16 lg:gap-24 max-w-4xl mx-auto">
+            {/* Brand: left */}
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <Link href="/" className="flex items-center space-x-2 mb-4 w-fit hover:opacity-90 transition-opacity">
                 <NotebookPen className="h-8 w-8 text-primary" />
                 <span className="text-2xl font-bold">NoteFlow</span>
               </Link>
-              <p className="text-muted-foreground mb-6 max-w-md">
+              <p className="text-muted-foreground mb-6 max-w-sm">
                 The intelligent note-taking app that helps you capture, organize, and find your thoughts effortlessly.
                 Built for modern productivity with AI-powered insights.
               </p>
@@ -86,49 +59,26 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Links: Product, Company, Resources, Legal (Legal to the right of Resources) */}
-            {Object.entries(footerLinks).map(([title, links]) => (
-              <div key={title}>
-                <h3 className="font-semibold mb-4">{title}</h3>
-                <ul className="space-y-3">
-                  {links.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+            {/* Newsletter: right */}
+            <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0 w-full md:max-w-sm">
+              <h3 className="text-2xl font-bold mb-4">Stay updated</h3>
+              <p className="text-muted-foreground mb-6">
+                Get the latest updates, tips, and new features delivered to your inbox.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
+                <input
+                  type="email"
+                  placeholder="Newsletter comming soon stay tuned!"
+                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <Button className="px-8 py-3 sm:mt-0 shrink-0">
+                  Subscribe
+                </Button>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Newsletter Signup */}
-        <div className="py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-4">Stay updated</h3>
-            <p className="text-muted-foreground mb-6">
-              Get the latest updates, tips, and new features delivered to your inbox.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Newsletter comming soon stay tuned!"
-                className="flex-1 px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <Button className="px-8 py-3 mt-2">
-                Subscribe
-              </Button>
+              <p className="text-xs text-muted-foreground mt-3">
+                No spam, unsubscribe at any time.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              No spam, unsubscribe at any time.
-            </p>
           </div>
         </div>
 
