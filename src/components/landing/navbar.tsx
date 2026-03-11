@@ -29,19 +29,13 @@ function NavbarUI({
             <span className="text-xl font-bold">NoteFlow</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
-            {showDashboard && (
-              <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1.5">
-                <LayoutDashboard className="h-4 w-4" />
-                Dashboard
-              </Link>
-            )}
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
             <Link href="#faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</Link>
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Free forever</Link>
           </div>
           <div className="hidden md:flex items-center space-x-4">
             {showDashboard ? (
-              <Button asChild><Link href="/dashboard">Dashboard</Link></Button>
+              <Button asChild><Link href="/dashboard" className="flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />Dashboard</Link></Button>
             ) : (
               <>
                 <Button variant="ghost" asChild><Link href="/sign-in">Sign In</Link></Button>
@@ -58,17 +52,12 @@ function NavbarUI({
         {isOpen && (
           <div className="md:hidden border-t">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {showDashboard && (
-                <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-base font-medium hover:text-primary" onClick={() => setIsOpen(false)}>
-                  <LayoutDashboard className="h-4 w-4" /> Dashboard
-                </Link>
-              )}
               <Link href="#features" className="block px-3 py-2 text-base font-medium hover:text-primary" onClick={() => setIsOpen(false)}>Features</Link>
               <Link href="#faq" className="block px-3 py-2 text-base font-medium hover:text-primary" onClick={() => setIsOpen(false)}>FAQ</Link>
               <Link href="#features" className="block px-3 py-2 text-base font-medium hover:text-primary" onClick={() => setIsOpen(false)}>Free forever</Link>
               <div className="pt-4 space-y-2">
                 {showDashboard ? (
-                  <Button className="w-full" asChild><Link href="/dashboard">Dashboard</Link></Button>
+                  <Button className="w-full" asChild><Link href="/dashboard" className="flex items-center justify-center gap-2"><LayoutDashboard className="h-4 w-4" />Dashboard</Link></Button>
                 ) : (
                   <>
                     <Button variant="ghost" className="w-full justify-start" asChild><Link href="/sign-in">Sign In</Link></Button>
