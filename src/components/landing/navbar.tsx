@@ -33,20 +33,22 @@ function NavbarUI({
             <Link href="#faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</Link>
             <Link href="#video" className="text-sm font-medium hover:text-primary transition-colors">See in action</Link>
           </div>
-          <div className="hidden md:flex items-center justify-end space-x-4">
-            {showDashboard ? (
-              <Button asChild><Link href="/dashboard" className="flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />Dashboard</Link></Button>
-            ) : (
-              <>
-                <Button variant="ghost" asChild><Link href="/sign-in">Sign In</Link></Button>
-                <Button asChild><Link href="/sign-up">Get Started</Link></Button>
-              </>
-            )}
-          </div>
-          <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+          <div className="flex items-center justify-end gap-4">
+            <div className="hidden md:flex items-center space-x-4">
+              {showDashboard ? (
+                <Button asChild><Link href="/dashboard" className="flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />Dashboard</Link></Button>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild><Link href="/sign-in">Sign In</Link></Button>
+                  <Button asChild><Link href="/sign-up">Get Started</Link></Button>
+                </>
+              )}
+            </div>
+            <div className="md:hidden">
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
         </div>
         {isOpen && (
