@@ -6,7 +6,7 @@ import Link from "next/link";
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-12">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="flex justify-center mb-8">
@@ -25,7 +25,7 @@ export function Hero() {
           </h1>
 
           {/* Subheading */}
-a          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             A free multi-user app. Import your NOTES directory or GitHub repo into your profile—or write in the app. AI-powered organization, no paid tier.
           </p>
 
