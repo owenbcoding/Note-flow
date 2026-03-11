@@ -7,21 +7,33 @@ export type AppUser = {
 }
 
 export async function getCurrentUser(): Promise<AppUser | null> {
-  // Only use Clerk when keys are valid; otherwise fall back to a dev user
-  const { isClerkEnabled } = await import('./auth')
-  if (isClerkEnabled()) {
-    const { currentUser } = await import('@clerk/nextjs/server')
-    return (await currentUser()) as unknown as AppUser | null
-  }
-
-  // Dev fallback user so the app works without Clerk configured
-  return {
+  const devFallbackUser: AppUser = {
     id: 'dev_user',
     emailAddresses: [{ emailAddress: 'dev@example.com' }],
     firstName: 'Dev',
     lastName: 'User',
     imageUrl: null,
   }
+
+  // Only use Clerk when keys are valid; otherwise fall back to a dev user
+  const { isClerkEnabled } = await import('./auth')
+  if (isClerkEnabled()) {
+    try {
+      const { currentUser } = await import('@clerk/nextjs/server')
+      const user = (await currentUser()) as unknown as AppUser | null
+      if (user) return user
+      // In local dev, stale Clerk cookies can briefly resolve to null.
+      if (process.env.NODE_ENV !== 'production') return devFallbackUser
+      return null
+    } catch {
+      // Keep local dev usable if Clerk is temporarily unavailable.
+      if (process.env.NODE_ENV !== 'production') return devFallbackUser
+      throw new Error('Failed to resolve authenticated user')
+    }
+  }
+
+  // Dev fallback user so the app works without Clerk configured
+  return devFallbackUser
 }
 
 export function isClerkEnabled(): boolean {
