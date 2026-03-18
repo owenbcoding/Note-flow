@@ -59,16 +59,32 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, content, notebookId } = await request.json()
+    const body = await request.json()
+    const notebookId = (body?.notebookId as string | null | undefined) ?? null
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
+    let title: string
+    let content: string
+
+    if (
+      body?.encryptedPayload &&
+      typeof (body.encryptedPayload as { iv?: unknown }).iv === 'string' &&
+      typeof (body.encryptedPayload as { ct?: unknown }).ct === 'string'
+    ) {
+      title = 'Encrypted'
+      content = JSON.stringify(body.encryptedPayload)
+    } else {
+      const t = body?.title
+      const c = body?.content
+      if (typeof t !== 'string' || typeof c !== 'string' || !t.trim() || !c.trim()) {
+        return NextResponse.json(
+          { error: 'Title and content are required, or provide encryptedPayload (E2E)' },
+          { status: 400 }
+        )
+      }
+      title = t.trim()
+      content = c.trim()
     }
 
-    // Get user from database
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     })
@@ -85,7 +101,7 @@ export async function PUT(
       data: {
         title,
         content,
-        notebookId: notebookId || null,
+        notebookId,
       },
     })
 
@@ -122,14 +138,21 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user from database
-    const dbUser = await prisma.user.findUnique({
+    // Get or create user in database (avoid 404s if user wasn't created yet)
+    const dbUser = await prisma.user.upsert({
       where: { clerkId: user.id },
+      update: {
+        email: user.emailAddresses[0]?.emailAddress || '',
+        name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
+        avatar: user.imageUrl,
+      },
+      create: {
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || null,
+        avatar: user.imageUrl,
+      },
     })
-
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
 
     const note = await prisma.note.deleteMany({
       where: {
@@ -145,6 +168,18 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting note:', error)
+    // Common setup error: DB not migrated yet
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: string }).code === 'P2021'
+    ) {
+      return NextResponse.json(
+        { error: 'Database is not initialized. Run: npx prisma migrate deploy' },
+        { status: 500 }
+      )
+    }
     return NextResponse.json(
       { error: 'Failed to delete note' },
       { status: 500 }
