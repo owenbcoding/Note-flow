@@ -14,6 +14,8 @@ Prerequisites: Node.js 18+ and your preferred package manager (npm, yarn, pnpm, 
 
 Copy `.env.example` to `.env` and set at least `DATABASE_URL` (e.g. [Neon](https://neon.tech) free tier) and Clerk keys. Then:
 
+**Security:** Keep secrets (e.g. `DATABASE_URL`, `CLERK_SECRET_KEY`) in server env only—never prefix them with `NEXT_PUBLIC_` or they will be exposed to the browser. When deploying, set these in your host’s environment variables (e.g. Vercel project settings). Notes are encrypted end-to-end (E2E) in the browser; see [docs/E2E_SYNC.md](docs/E2E_SYNC.md) for sync script and key handling.
+
 ```bash
 npm install
 npx prisma generate
