@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 /**
  * POST /api/import/github
  * Body: { owner: string, repo: string }
- * Fetches .md files from a public GitHub repo and creates notes for the current user.
- * Optionally creates a notebook named "{owner}/{repo}" and puts notes in it.
+ * Fetches .md files from a public GitHub repo and creates a notebook for the current user.
+ * Returns notebookId and file contents so the CLIENT can encrypt and create notes (E2E).
+ * The server never sees or stores plaintext note content for imports.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -30,13 +31,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'owner and repo cannot be empty' }, { status: 400 })
     }
 
-    // Resolve user in DB
     const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } })
     if (!dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get repo default branch and tree
     const repoRes = await fetch(
       `https://api.github.com/repos/${encodeURIComponent(trimmedOwner)}/${encodeURIComponent(trimmedRepo)}`,
       {
@@ -47,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!repoRes.ok) {
       const err = await repoRes.json().catch(() => ({}))
       return NextResponse.json(
-        { error: err.message || `GitHub repo not found: ${trimmedOwner}/${trimmedRepo}` },
+        { error: (err as { message?: string }).message || `GitHub repo not found: ${trimmedOwner}/${trimmedRepo}` },
         { status: 404 }
       )
     }
@@ -80,7 +79,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create or reuse notebook for the repo
     const notebookTitle = `${trimmedOwner}/${trimmedRepo}`
     const existingNotebook = await prisma.notebook.findFirst({
       where: { userId: dbUser.id, title: notebookTitle },
@@ -92,15 +90,15 @@ export async function POST(request: NextRequest) {
       const created = await prisma.notebook.create({
         data: {
           title: notebookTitle,
-          description: `Imported from GitHub`,
+          description: 'Imported from GitHub',
           userId: dbUser.id,
         },
       })
       notebookId = created.id
     }
 
-    const results: { title: string; id: string; created: boolean }[] = []
-    const limit = 50 // cap imports
+    const limit = 50
+    const files: { title: string; content: string }[] = []
 
     for (let i = 0; i < Math.min(mdFiles.length, limit); i++) {
       const file = mdFiles[i]
@@ -117,34 +115,13 @@ export async function POST(request: NextRequest) {
 
       const content = await fileRes.text()
       const title = file.path.split('/').pop()?.replace(/\.md$/i, '') || file.path
-
-      const existing = await prisma.note.findFirst({
-        where: { userId: dbUser.id, title, notebookId },
-      })
-      if (existing) {
-        await prisma.note.update({
-          where: { id: existing.id },
-          data: { content, updatedAt: new Date() },
-        })
-        results.push({ title, id: existing.id, created: false })
-      } else {
-        const note = await prisma.note.create({
-          data: {
-            title,
-            content,
-            userId: dbUser.id,
-            notebookId,
-          },
-        })
-        results.push({ title, id: note.id, created: true })
-      }
+      files.push({ title, content })
     }
 
     return NextResponse.json({
-      imported: results.length,
       notebookId,
       notebookTitle,
-      results,
+      files,
     })
   } catch (error) {
     console.error('GitHub import error:', error)
