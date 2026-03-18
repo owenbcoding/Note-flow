@@ -45,24 +45,47 @@ export async function GET(_request: NextRequest) {
   }
 }
 
+/** E2E: client sends { encryptedPayload: { iv, ct }, notebookId? }; we store ciphertext only. */
+function isEncryptedBody(body: unknown): body is { encryptedPayload: { iv: string; ct: string }; notebookId?: string | null } {
+  const b = body as Record<string, unknown>
+  const ep = b?.encryptedPayload as unknown
+  return (
+    ep !== null &&
+    typeof ep === 'object' &&
+    typeof (ep as { iv?: unknown }).iv === 'string' &&
+    typeof (ep as { ct?: unknown }).ct === 'string'
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser()
-    
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, content, notebookId } = await request.json()
+    const body = await request.json()
+    const notebookId = (body?.notebookId as string | null | undefined) || null
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
+    let title: string
+    let content: string
+
+    if (isEncryptedBody(body)) {
+      title = 'Encrypted'
+      content = JSON.stringify(body.encryptedPayload)
+    } else {
+      const t = body?.title
+      const c = body?.content
+      if (typeof t !== 'string' || typeof c !== 'string' || !t.trim() || !c.trim()) {
+        return NextResponse.json(
+          { error: 'Title and content are required, or provide encryptedPayload (E2E)' },
+          { status: 400 }
+        )
+      }
+      title = t.trim()
+      content = c.trim()
     }
 
-    // Get or create user in database
     const dbUser = await prisma.user.upsert({
       where: { clerkId: user.id },
       update: {
@@ -83,7 +106,7 @@ export async function POST(request: NextRequest) {
         title,
         content,
         userId: dbUser.id,
-        notebookId: notebookId || null,
+        notebookId,
       },
       include: {
         notebook: true,
