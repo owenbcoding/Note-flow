@@ -2,14 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AINoteGenerator } from '@/components/ai/ai-note-generator'
-import { Save, Loader2, ArrowLeft, Wand2 } from 'lucide-react'
+import { Save, Loader2, ArrowLeft, Wand2, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
+import { getOrCreateUserKey, encryptNote } from '@/lib/note-crypto'
 
 interface Notebook {
   id: string
@@ -23,6 +25,7 @@ interface NewNoteFormProps {
 
 export function NewNoteForm({ notebooks }: NewNoteFormProps) {
   const router = useRouter()
+  const { user } = useUser()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [notebookId, setNotebookId] = useState<string>('none')
@@ -32,18 +35,26 @@ export function NewNoteForm({ notebooks }: NewNoteFormProps) {
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) return
+    if (!user?.id) {
+      setError('You must be signed in to save notes.')
+      return
+    }
 
     setIsSaving(true)
     setError(null)
     try {
+      const key = await getOrCreateUserKey(user.id)
+      const encrypted = await encryptNote(
+        { title: title.trim(), content: content.trim() },
+        key
+      )
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
+          encryptedPayload: encrypted,
           notebookId: notebookId === 'none' ? null : notebookId,
         }),
       })
@@ -55,8 +66,8 @@ export function NewNoteForm({ notebooks }: NewNoteFormProps) {
         const data = await response.json().catch(() => ({}))
         setError(data.error || 'Failed to create note. Please try again.')
       }
-    } catch (error) {
-      console.error('Error creating note:', error)
+    } catch (err) {
+      console.error('Error creating note:', err)
       setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsSaving(false)
@@ -85,6 +96,12 @@ export function NewNoteForm({ notebooks }: NewNoteFormProps) {
             <Link href="/notes">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Notes
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/dashboard">
+              <LayoutDashboard className="h-4 w-4 mr-2" />
+              Dashboard
             </Link>
           </Button>
           <div>
