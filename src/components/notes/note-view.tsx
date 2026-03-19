@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Edit, Calendar, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { NoteDialog } from './note-dialog'
+import { normalizeContentForEditor } from '@/lib/note-content'
+import { getOrCreateUserKey, decryptNote, isEncryptedContent } from '@/lib/note-crypto'
 
 interface Note {
   id: string
@@ -25,12 +28,48 @@ interface NoteViewProps {
 }
 
 export function NoteView({ note }: NoteViewProps) {
+  const { user } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [currentNote, setCurrentNote] = useState(note)
+  const [decrypting, setDecrypting] = useState(!!(note.content && isEncryptedContent(note.content)))
+
+  useEffect(() => {
+    if (!user?.id || !isEncryptedContent(note.content)) {
+      setDecrypting(false)
+      return
+    }
+    let cancelled = false
+    getOrCreateUserKey(user.id)
+      .then((key) => {
+        if (cancelled) return
+        const payload = JSON.parse(note.content) as { iv: string; ct: string }
+        return decryptNote(payload, key)
+      })
+      .then((decrypted) => {
+        if (!cancelled && decrypted) {
+          setCurrentNote((prev) => ({ ...prev, title: decrypted.title, content: decrypted.content }))
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setDecrypting(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, note.id, note.content])
 
   const handleNoteUpdate = (updatedNote: Note) => {
     setCurrentNote(updatedNote)
     setIsEditing(false)
+  }
+
+  if (decrypting) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading note...</p>
+      </div>
+    )
   }
 
   return (
@@ -84,9 +123,12 @@ export function NoteView({ note }: NoteViewProps) {
         </CardHeader>
         <CardContent>
           <div className="prose prose-gray max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">
-              {currentNote.content}
-            </pre>
+            <div
+              className="text-base leading-relaxed [&_p]:my-3 [&_ul]:my-3 [&_ol]:my-3"
+              dangerouslySetInnerHTML={{
+                __html: normalizeContentForEditor(currentNote.content),
+              }}
+            />
           </div>
         </CardContent>
       </Card>
