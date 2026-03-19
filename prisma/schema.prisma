@@ -30,11 +30,11 @@ model User {
   @@map("users")
 }
 
-// Sync token for CLI/script auth (e.g. sync-notes-from-dir). One token per user.
+// Sync token for CLI/script authentication (e.g., sync-notes-from-dir). One token per user.
 model SyncToken {
   id        String   @id @default(cuid())
   userId    String
-  tokenHash String   // hash of the secret token (never store plaintext)
+  tokenHash String   // Hash of the secret token (never store plaintext)
   name      String?  @default("Sync script")
   createdAt DateTime @default(now())
 

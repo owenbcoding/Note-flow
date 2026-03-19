@@ -5,8 +5,8 @@ import { prisma } from '@/lib/prisma'
 /**
  * POST /api/import/github
  * Body: { owner: string, repo: string }
- * Fetches .md files from a public GitHub repo and creates a notebook for the current user.
- * Returns notebookId and file contents so the CLIENT can encrypt and create notes (E2E).
+ * Fetches .md files from a public GitHub repository and creates a notebook for the current user.
+ * Returns notebookId and file contents so the client can encrypt and create notes (E2E).
  * The server never sees or stores plaintext note content for imports.
  */
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { owner, repo } = body as { owner?: string; repo?: string }
     if (!owner || !repo || typeof owner !== 'string' || typeof repo !== 'string') {
       return NextResponse.json(
-        { error: 'Body must include "owner" and "repo" (e.g. "facebook", "react")' },
+        { error: 'Body must include "owner" and "repo" (e.g., "facebook", "react")' },
         { status: 400 }
       )
     }

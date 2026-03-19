@@ -65,7 +65,7 @@ export default async function NotesPage() {
           </div>
         </div>
 
-        {/* Notes List — fetches full notes (with encrypted content) on client and decrypts */}
+        {/* Notes List - fetches full notes (with encrypted content) on client and decrypts */}
         <NotesList initialNotes={[]} />
       </div>
     </div>

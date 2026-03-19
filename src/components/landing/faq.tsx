@@ -5,35 +5,35 @@ import { HelpCircle } from "lucide-react";
 const faqs = [
   {
     question: "How does the AI-powered organization work?",
-    answer: "Our AI analyzes your note content and automatically suggests tags, categories, and connections between related notes. It learns from your writing patterns and preferences to provide increasingly accurate organization suggestions over time."
+    answer: "Our AI helps you generate well-structured notes from simple prompts. Choose a note type (meeting, study, journal, etc.), describe what you want to write about, and the AI will create organized content for you."
   },
   {
     question: "Is my data secure and private?",
-    answer: "Absolutely. We use end-to-end encryption to protect your notes. Your data is encrypted before it leaves your device and can only be decrypted by you. We never have access to your actual note content, and we don't sell or share your data with third parties."
+    answer: "Yes. We use end-to-end encryption to protect your notes. Your data is encrypted before it leaves your device and can only be decrypted by you. We never have access to your note content, and we don't sell or share your data with third parties."
   },
   {
     question: "Can I import my existing notes?",
-    answer: "Yes! We support importing from popular note-taking apps like Evernote, Notion, OneNote, and plain text files. Our import process preserves your formatting and structure as much as possible."
+    answer: "Yes! You can import Markdown files from GitHub repositories. Simply provide the repository name (e.g., owner/repo), and we'll import all .md files into a dedicated notebook in your account."
   },
   {
     question: "Does NoteFlow work offline?",
-    answer: "Yes, NoteFlow works completely offline. You can create, edit, and organize notes without an internet connection. Your changes will sync automatically when you're back online."
+    answer: "NoteFlow is a web-based application that requires an internet connection to access and sync your notes. However, your browser may cache recently viewed notes for quick access."
   },
   {
     question: "What platforms are supported?",
-    answer: "NoteFlow is available on web, iOS, Android, Windows, and macOS. All platforms sync seamlessly, so you can access your notes from any device."
+    answer: "NoteFlow is a web application that works on any device with a modern web browser—desktop, tablet, or mobile. Access your notes from any platform without installing native apps."
   },
   {
     question: "How much does it cost?",
-    answer: "NoteFlow is free. All features—including AI-powered organization, search, encryption, sync, and collaboration—are available at no cost. We believe everyone deserves great tools without a paywall."
+    answer: "NoteFlow is free. All features—including AI-powered note generation, GitHub import, and end-to-end encryption—are available at no cost. We believe everyone deserves great tools without a paywall."
   },
   {
     question: "Can I collaborate with others on notes?",
-    answer: "Yes! You can share notes with others, collaborate in real-time, and manage permissions. Perfect for team projects, meeting notes, and shared knowledge bases. All included for free."
+    answer: "Currently, NoteFlow focuses on personal note-taking. Each user has their own private collection of notes with end-to-end encryption. Collaboration features may be added in the future."
   },
   {
     question: "What file types can I attach to notes?",
-    answer: "You can attach images, PDFs, documents, audio files, and more. We support most common file formats and provide preview capabilities for many file types directly within the app."
+    answer: "NoteFlow currently supports rich text content with images and links. You can format your notes with headings, lists, bold, italic, and other standard text formatting options."
   }
 ];
 
@@ -53,8 +53,8 @@ export function FAQ() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to know about NoteFlow. Can&apos;t find the answer you&apos;re looking for? 
-            Please chat with our friendly team.
+            Everything you need to know about NoteFlow. Can&apos;t find what you&apos;re looking for? 
+            Feel free to reach out to our team.
           </p>
         </div>
 

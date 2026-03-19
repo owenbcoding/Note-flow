@@ -115,7 +115,7 @@ export function NoteDialog({ note, onClose, onSave }: NoteDialogProps) {
           <div>
             <CardTitle>Edit Note</CardTitle>
             <CardDescription>
-              Update your note in an expanded rich text editor
+              Update your note using the expanded rich text editor
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>

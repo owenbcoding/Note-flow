@@ -45,7 +45,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-/** E2E: client sends { encryptedPayload: { iv, ct }, notebookId? }; we store ciphertext only. */
+/** E2E: Client sends { encryptedPayload: { iv, ct }, notebookId? }; server stores ciphertext only. */
 function isEncryptedBody(body: unknown): body is { encryptedPayload: { iv: string; ct: string }; notebookId?: string | null } {
   const b = body as Record<string, unknown>
   const ep = b?.encryptedPayload as unknown

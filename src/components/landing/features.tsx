@@ -10,8 +10,8 @@ import {
 const features = [
   {
     icon: Brain,
-    title: "AI-Powered Organization",
-    description: "Generate well-structured notes with AI. Choose from meeting notes, study notes, ideas, journal entries, and more—all organized by type.",
+    title: "AI-Powered Note Generation",
+    description: "Generate well-structured notes with AI. Choose from meeting notes, study notes, ideas, journal entries, and more. Simply describe what you want, and AI creates organized content for you.",
     badge: null
   },
   {
@@ -22,8 +22,8 @@ const features = [
   },
   {
     icon: Smartphone,
-    title: "Cross-Platform Sync",
-    description: "Access your notes anywhere, anytime. Sync across devices and import from GitHub—your notes follow you wherever you go.",
+    title: "GitHub Import & Sync",
+    description: "Access your notes from any device with an internet connection. Import Markdown files from public GitHub repositories to keep your notes synchronized and accessible.",
     badge: null
   },
   // Coming soon – uncomment when ready to show
@@ -80,7 +80,7 @@ export function Features() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Powerful features designed to enhance your productivity and help you capture, organize, and find your notes effortlessly.
+            Powerful features designed to help you capture, organize, and access your notes effortlessly.
           </p>
         </div>
 

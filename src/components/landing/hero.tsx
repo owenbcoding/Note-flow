@@ -10,9 +10,9 @@ export function Hero() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="flex justify-center mb-8">
-            <Badge variant="secondary" className="px-4 py-2 text-sm">
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
               <Sparkles className="w-4 h-4 mr-2" />
-              Free forever • Sync from NOTES or GitHub
+              Free forever - Sync from NOTES or GitHub
             </Badge>
           </div>
 
@@ -26,7 +26,7 @@ export function Hero() {
 
           {/* Subheading */}
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            A free multi-user app. Import your NOTES directory or GitHub repo into your profile—or write in the app. AI-powered organization, no paid tier.
+            A free multi-user app. Import your NOTES directory or GitHub repository into your profile, or write directly in the app. AI-powered note generation with no paid tier.
           </p>
 
           {/* CTA Buttons */}

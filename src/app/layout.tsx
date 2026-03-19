@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NoteFlow - Intelligent Note Taking",
-  description: "Organize your thoughts, capture ideas instantly, and never lose important information again.",
+  title: "NoteFlow - Intelligent Note-Taking",
+  description: "Organize your thoughts and capture ideas with AI-powered note generation. Import from GitHub or write directly in the app.",
 };
 
 export default function RootLayout({

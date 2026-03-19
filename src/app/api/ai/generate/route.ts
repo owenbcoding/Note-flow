@@ -20,19 +20,19 @@ export async function POST(request: NextRequest) {
     let systemPrompt = ''
     switch (type) {
       case 'meeting':
-        systemPrompt = 'You are a helpful assistant that creates structured meeting notes. Include key points, decisions made, action items, and next steps. Format it clearly with headings and bullet points.'
+        systemPrompt = 'Create structured meeting notes. Include key points, decisions made, action items, and next steps. Format clearly with headings and bullet points.'
         break
       case 'study':
-        systemPrompt = 'You are a helpful assistant that creates comprehensive study notes. Include key concepts, definitions, examples, and important points. Organize information in a clear, educational format.'
+        systemPrompt = 'Create comprehensive study notes. Include key concepts, definitions, examples, and important points. Organize information in a clear, educational format.'
         break
       case 'idea':
-        systemPrompt = 'You are a creative assistant that helps expand and develop ideas. Provide detailed exploration of the concept, potential applications, considerations, and next steps.'
+        systemPrompt = 'Expand and develop ideas. Provide detailed exploration of the concept, potential applications, considerations, and next steps.'
         break
       case 'journal':
-        systemPrompt = 'You are a thoughtful writing assistant that helps create reflective journal entries. Encourage self-reflection, insights, and personal growth.'
+        systemPrompt = 'Create reflective journal entries. Encourage self-reflection, insights, and personal growth.'
         break
       default:
-        systemPrompt = 'You are a helpful assistant that creates well-structured, informative notes. Organize the content clearly with headings, bullet points, and logical flow.'
+        systemPrompt = 'Create well-structured, informative notes. Organize content clearly with headings, bullet points, and logical flow.'
     }
 
     const apiKey = process.env.OPENAI_API_KEY?.trim()

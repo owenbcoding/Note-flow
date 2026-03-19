@@ -11,7 +11,7 @@ import { AIService } from '@/lib/ai-service'
 interface AINoteGeneratorProps {
   onGeneratedContent?: (content: string) => void
   className?: string
-  /** When true, output is not rendered here - parent should display it (e.g. above Recent Notes) */
+  /** When true, output is not rendered here - parent should display it (e.g., above Recent Notes) */
   hideOutput?: boolean
 }
 

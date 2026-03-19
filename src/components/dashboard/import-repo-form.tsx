@@ -23,12 +23,12 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
   const handleImport = async () => {
     const trimmed = repoInput.trim()
     if (!trimmed) {
-      setError('Enter owner/repo (e.g. facebook/react)')
+      setError('Enter owner/repo (e.g., facebook/react)')
       return
     }
     const parts = trimmed.split('/').map((p) => p.trim()).filter(Boolean)
     if (parts.length < 2) {
-      setError('Enter owner/repo (e.g. facebook/react)')
+      setError('Enter owner/repo (e.g., facebook/react)')
       return
     }
     if (!user?.id) {
@@ -82,7 +82,7 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
             Import from GitHub
           </CardTitle>
           <CardDescription className="text-xs">
-            Import .md files from a public repo
+            Import .md files from a public repository
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 px-6">
@@ -120,13 +120,13 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
           Import from GitHub repo
         </CardTitle>
         <CardDescription>
-          Import .md files from a public GitHub repo. Notes appear in a new notebook.
+          Import .md files from a public GitHub repository. Notes appear in a new notebook.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
           <Input
-            placeholder="owner/repo (e.g. facebook/react)"
+            placeholder="owner/repo (e.g., facebook/react)"
             value={repoInput}
             onChange={(e) => setRepoInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleImport()}
@@ -137,7 +137,7 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Importing…
+                Importing...
               </>
             ) : (
               <>

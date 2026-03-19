@@ -323,7 +323,7 @@ export function DashboardGrid({ notebooks }: DashboardGridProps) {
             </div>
             <CardDescription>
               {generatedContent
-                ? "AI-generated note content — scroll to read. Also saved to Recent Notes."
+                ? "AI-generated note content—scroll to read. Also saved to Recent Notes."
                 : "Generate a note with AI using the form on the left."}
             </CardDescription>
           </CardHeader>
@@ -349,7 +349,7 @@ export function DashboardGrid({ notebooks }: DashboardGridProps) {
           <CardHeader>
             <CardTitle>Your Notebooks</CardTitle>
             <CardDescription>
-              Imported GitHub .md files appear only here as clickable files per repo notebook.
+              Imported GitHub .md files appear here as clickable files organized by repository notebook.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -408,7 +408,7 @@ export function DashboardGrid({ notebooks }: DashboardGridProps) {
                       </div>
                       {isImported && notesLoading ? (
                         <div className="px-3 py-2 text-xs text-muted-foreground border-t">
-                          Loading files…
+                          Loading files...
                         </div>
                       ) : isImported && importedFiles.length > 0 ? (
                         <ul className="divide-y border-t bg-background max-h-56 overflow-y-auto">

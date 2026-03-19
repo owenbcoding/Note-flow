@@ -38,8 +38,8 @@ export function Footer() {
                 <span className="text-2xl font-bold">NoteFlow</span>
               </Link>
               <p className="text-muted-foreground mb-6 max-w-sm">
-                The intelligent note-taking app that helps you capture, organize, and find your thoughts effortlessly.
-                Built for modern productivity with AI-powered insights.
+                An intelligent note-taking app that helps you capture, organize, and find your thoughts effortlessly.
+                Built for modern productivity with AI-powered note generation.
               </p>
               <div className="flex space-x-4">
                 {socialLinks.map((social) => (
@@ -72,7 +72,7 @@ export function Footer() {
               <div className="flex flex-col sm:flex-row gap-4 w-full">
                 <input
                   type="email"
-                  placeholder="Newsletter comming soon stay tuned!"
+                  placeholder="Newsletter coming soon—stay tuned!"
                   className="flex-1 px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
                 <Button className="px-8 py-3 sm:mt-0 shrink-0">

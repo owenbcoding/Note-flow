@@ -15,7 +15,7 @@ function isEncryptedNote(item: unknown): item is EncryptedNote {
  * Auth: Authorization: Bearer <sync-token>
  * Body: { notes: [{ title, content }] } (legacy) or { notes: [{ encryptedPayload: { iv, ct } }] } (E2E)
  * Creates or updates notes for the token's user. With E2E, the sync script must encrypt
- * each note with the user's key before upload. See docs/E2E_SYNC.md.
+ * each note with the user's key before uploading. See docs/E2E_SYNC.md.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const notes = body?.notes
     if (!Array.isArray(notes) || notes.length === 0) {
       return NextResponse.json(
-        { error: 'Body must include a non-empty "notes" array of { title, content } or { encryptedPayload }' },
+        { error: 'Body must include a non-empty "notes" array with { title, content } or { encryptedPayload }' },
         { status: 400 }
       )
     }

@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 /**
  * DELETE /api/notebooks/[id]
- * Deletes a notebook and all its notes. Use to remove imported GitHub repo notes.
+ * Deletes a notebook and all its notes. Use this to remove imported GitHub repository notes.
  */
 export async function DELETE(
   _request: NextRequest,

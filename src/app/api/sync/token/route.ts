@@ -5,8 +5,8 @@ import { hashToken, generateSecureToken } from '@/lib/sync-auth'
 
 /**
  * POST /api/sync/token
- * Requires Clerk auth. Creates or replaces the sync token for the current user.
- * Returns the plain token once; store it securely (e.g. NOTEFLOW_SYNC_TOKEN env) for the sync script.
+ * Requires Clerk authentication. Creates or replaces the sync token for the current user.
+ * Returns the plain token once; store it securely (e.g., NOTEFLOW_SYNC_TOKEN env variable) for the sync script.
  */
 export async function POST() {
   try {
