@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Github, Loader2 } from 'lucide-react'
+import { getOrCreateUserKey, encryptNote } from '@/lib/note-crypto'
 
 interface ImportRepoFormProps {
   compact?: boolean
@@ -13,6 +15,7 @@ interface ImportRepoFormProps {
 
 export function ImportRepoForm({ compact }: ImportRepoFormProps) {
   const router = useRouter()
+  const { user } = useUser()
   const [repoInput, setRepoInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,6 +31,10 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
       setError('Enter owner/repo (e.g. facebook/react)')
       return
     }
+    if (!user?.id) {
+      setError('You must be signed in to import.')
+      return
+    }
     const [owner, repo] = parts
     setIsLoading(true)
     setError(null)
@@ -41,6 +48,21 @@ export function ImportRepoForm({ compact }: ImportRepoFormProps) {
       if (!res.ok) {
         setError(data.error || 'Import failed')
         return
+      }
+      const { notebookId, files } = data as { notebookId: string; files: { title: string; content: string }[] }
+      if (!notebookId || !Array.isArray(files) || files.length === 0) {
+        setRepoInput('')
+        router.refresh()
+        return
+      }
+      const key = await getOrCreateUserKey(user.id)
+      for (const file of files) {
+        const encrypted = await encryptNote({ title: file.title, content: file.content }, key)
+        await fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ encryptedPayload: encrypted, notebookId }),
+        })
       }
       setRepoInput('')
       router.refresh()
