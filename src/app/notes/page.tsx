@@ -2,7 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { NotesList } from '@/components/notes/notes-list'
 
@@ -31,13 +31,9 @@ export default async function NotesPage() {
     },
   })
 
-  // Get user's notes
-  const notes = await prisma.note.findMany({
+  // Do not load note content on server (E2E: client fetches and decrypts)
+  const noteCount = await prisma.note.count({
     where: { userId: dbUser.id },
-    orderBy: { updatedAt: 'desc' },
-    include: {
-      notebook: true,
-    },
   })
 
   return (
@@ -49,31 +45,28 @@ export default async function NotesPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">My Notes</h1>
               <p className="text-muted-foreground">
-                {notes.length} {notes.length === 1 ? 'note' : 'notes'} total
+                {noteCount} {noteCount === 1 ? 'note' : 'notes'} total
               </p>
             </div>
-            <Button asChild>
-              <Link href="/notes/new">
-                <Plus className="h-4 w-4 mr-2" />
-                New Note
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/notes/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Note
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Notes List */}
-        <NotesList
-          initialNotes={notes.map((n) => ({
-            id: n.id,
-            title: n.title,
-            content: n.content,
-            createdAt: n.createdAt.toISOString(),
-            updatedAt: n.updatedAt.toISOString(),
-            notebook: n.notebook
-              ? { id: n.notebook.id, title: n.notebook.title, color: n.notebook.color || undefined }
-              : null,
-          }))}
-        />
+        {/* Notes List — fetches full notes (with encrypted content) on client and decrypts */}
+        <NotesList initialNotes={[]} />
       </div>
     </div>
   )
