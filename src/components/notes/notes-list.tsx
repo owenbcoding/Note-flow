@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileText, Edit, Trash2, Search, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { NoteDialog } from './note-dialog'
+import { htmlToPlainText } from '@/lib/note-content'
+import { getOrCreateUserKey, decryptNote, isEncryptedContent } from '@/lib/note-crypto'
 
 interface Note {
   id: string
@@ -27,15 +30,66 @@ interface NotesListProps {
 }
 
 export function NotesList({ initialNotes }: NotesListProps) {
+  const { user } = useUser()
   const [notes, setNotes] = useState<Note[]>(initialNotes)
+  const [decrypting, setDecrypting] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest')
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (!user?.id) {
+      setDecrypting(false)
+      return
+    }
+    let cancelled = false
+    fetch('/api/notes')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Failed to fetch'))))
+      .then((data: { notes: Note[] }) => {
+        if (cancelled) return
+        const raw = (data.notes ?? []) as Note[]
+        const withDates = raw.map((n) => ({
+          ...n,
+          createdAt: typeof n.createdAt === 'string' ? n.createdAt : (n.createdAt as Date).toISOString?.(),
+          updatedAt: typeof n.updatedAt === 'string' ? n.updatedAt : (n.updatedAt as Date).toISOString?.(),
+        }))
+        return withDates
+      })
+      .then((list) => {
+        if (cancelled || !list) return []
+        return getOrCreateUserKey(user!.id).then((key) =>
+          Promise.all(
+            list.map(async (n) => {
+              if (n.content && isEncryptedContent(n.content)) {
+                try {
+                  const payload = JSON.parse(n.content) as { iv: string; ct: string }
+                  const { title, content } = await decryptNote(payload, key)
+                  return { ...n, title, content }
+                } catch {
+                  return n
+                }
+              }
+              return n
+            })
+          )
+        )
+      })
+      .then((decrypted) => {
+        if (!cancelled && Array.isArray(decrypted)) setNotes(decrypted)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setDecrypting(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchTerm.toLowerCase())
+    htmlToPlainText(note.content).toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const sortedNotes = [...filteredNotes].sort((a, b) => {
@@ -71,6 +125,14 @@ export function NotesList({ initialNotes }: NotesListProps) {
     setEditingNote(null)
   }
 
+
+  if (decrypting) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading notes...</p>
+      </div>
+    )
+  }
 
   if (notes.length === 0) {
     return (
@@ -166,7 +228,7 @@ export function NotesList({ initialNotes }: NotesListProps) {
             </CardHeader>
             <CardContent>
               <CardDescription className="line-clamp-3 mb-4">
-                {note.content}
+                {htmlToPlainText(note.content)}
               </CardDescription>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
