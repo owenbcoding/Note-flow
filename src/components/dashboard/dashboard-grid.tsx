@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, FileText, BookOpen, Check, Copy, Trash2, Loader2, Edit } from 'lucide-react'
@@ -9,16 +10,20 @@ import { ImportRepoForm } from '@/components/dashboard/import-repo-form'
 import Link from 'next/link'
 import { AINoteGenerator } from '@/components/ai/ai-note-generator'
 import { NoteDialog } from '@/components/notes/note-dialog'
+import { htmlToPlainText } from '@/lib/note-content'
+import { getOrCreateUserKey, encryptNote, decryptNote, isEncryptedContent } from '@/lib/note-crypto'
 
 interface Note {
   id: string
   title: string
   content: string
-  updatedAt: Date
+  updatedAt: Date | string
+  notebookId?: string | null
+  notebook?: { id: string; title: string; color?: string } | null
 }
 
 /** Shape expected by NoteDialog (createdAt optional for server-passed notes) */
-type NoteForDialog = Note & { createdAt?: Date }
+type NoteForDialog = Note & { createdAt?: Date | string }
 
 interface Notebook {
   id: string
@@ -30,24 +35,121 @@ interface Notebook {
 }
 
 interface DashboardGridProps {
-  notes: Note[]
+  noteCount?: number
   notebooks: Notebook[]
 }
 
-export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
+export function DashboardGrid({ notebooks }: DashboardGridProps) {
   const router = useRouter()
+  const { user } = useUser()
+  const [allNotes, setAllNotes] = useState<Note[]>([])
+  const [recentNotes, setRecentNotes] = useState<Note[]>([])
+  const [notesLoading, setNotesLoading] = useState(true)
+  const [notesError, setNotesError] = useState<string | null>(null)
   const [generatedContent, setGeneratedContent] = useState('')
   const [copied, setCopied] = useState(false)
   const [removingNotebookId, setRemovingNotebookId] = useState<string | null>(null)
   const [editingNote, setEditingNote] = useState<NoteForDialog | null>(null)
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (!user?.id) {
+      setNotesLoading(false)
+      return
+    }
+    let cancelled = false
+    setNotesError(null)
+    const importedNotebookIds = new Set(
+      notebooks
+        .filter((n) => n.description === 'Imported from GitHub')
+        .map((n) => n.id)
+    )
+    fetch('/api/notes')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Failed to fetch'))))
+      .then((data: { notes: Note[] }) => {
+        if (cancelled) return (data.notes ?? []) as Note[]
+        const raw = (data.notes ?? []).map((n: Note) => ({
+          ...n,
+          updatedAt: typeof n.updatedAt === 'string' ? n.updatedAt : (n.updatedAt as Date)?.toISOString?.() ?? '',
+          notebook: n.notebook ? { ...n.notebook, color: n.notebook.color ?? undefined } : n.notebook,
+        }))
+        return raw
+      })
+      .then((list) => {
+        if (cancelled || !list || list.length === 0) {
+          if (!cancelled && list) {
+            setAllNotes(list)
+            setRecentNotes(
+              list
+                .filter((n) => {
+                  const nbId = n.notebookId ?? n.notebook?.id ?? null
+                  return !nbId || !importedNotebookIds.has(nbId)
+                })
+                .slice(0, 5)
+            )
+          }
+          setNotesLoading(false)
+          return
+        }
+        return getOrCreateUserKey(user!.id).then((key) =>
+          Promise.all(
+            list.map(async (n) => {
+              if (n.content && isEncryptedContent(n.content)) {
+                try {
+                  const payload = JSON.parse(n.content) as { iv: string; ct: string }
+                  const { title, content } = await decryptNote(payload, key)
+                  return { ...n, title, content }
+                } catch {
+                  return n
+                }
+              }
+              return n
+            })
+          )
+        )
+      })
+      .then((decrypted) => {
+        if (!cancelled && decrypted) {
+          setAllNotes(decrypted)
+          setRecentNotes(
+            decrypted
+              .filter((n) => {
+                const nbId = n.notebookId ?? n.notebook?.id ?? null
+                return !nbId || !importedNotebookIds.has(nbId)
+              })
+              .slice(0, 5)
+          )
+        }
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return
+        const message =
+          e instanceof Error ? e.message : 'Failed to load notes from /api/notes'
+        setNotesError(message)
+      })
+      .finally(() => {
+        if (!cancelled) setNotesLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, notebooks])
+
   const handleDeleteNote = async (noteId: string) => {
     if (!confirm('Delete this note? This cannot be undone.')) return
     setDeletingNoteId(noteId)
     try {
       const res = await fetch(`/api/notes/${noteId}`, { method: 'DELETE' })
-      if (res.ok) router.refresh()
+      if (res.ok) {
+        setAllNotes((prev) => prev.filter((n) => n.id !== noteId))
+        setRecentNotes((prev) => prev.filter((n) => n.id !== noteId))
+        router.refresh()
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      const message =
+        (data as { error?: string })?.error || `Delete failed (${res.status})`
+      alert(message)
     } finally {
       setDeletingNoteId(null)
     }
@@ -58,21 +160,30 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
     router.refresh()
   }
 
-  /** Show in scrollable Generated Content card + save to Recent Notes when non-empty. */
+  /** Show in scrollable Generated Content card + save to Recent Notes when non-empty (E2E encrypted). */
   const handleGeneratedContent = async (content: string) => {
     setGeneratedContent(content)
-    if (!content.trim()) return
+    if (!content.trim() || !user?.id) return
     const lines = content.split('\n')
     const firstLine = lines[0].replace(/^#+\s*/, '').trim()
     const title =
       firstLine && firstLine.length < 100 ? firstLine : 'AI generated note'
     try {
+      const key = await getOrCreateUserKey(user.id)
+      const encrypted = await encryptNote({ title, content: content.trim() }, key)
       const res = await fetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content: content.trim() }),
+        body: JSON.stringify({ encryptedPayload: encrypted }),
       })
-      if (res.ok) router.refresh()
+      if (res.ok) {
+        const data = await res.json()
+        setAllNotes((prev) => [{ ...data.note, title, content: content.trim() }, ...prev])
+        setRecentNotes((prev) =>
+          [{ ...data.note, title, content: content.trim(), updatedAt: data.note.updatedAt }, ...prev].slice(0, 5)
+        )
+        router.refresh()
+      }
     } catch {
       // non-blocking
     }
@@ -119,9 +230,11 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {notes.length > 0 ? (
+            {notesLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading notes...</div>
+            ) : recentNotes.length > 0 ? (
               <div className="space-y-4">
-                {notes.map((note) => (
+                {recentNotes.map((note) => (
                   <div
                     key={note.id}
                     className="flex items-start gap-2 p-3 border rounded-lg group"
@@ -129,7 +242,7 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium">{note.title}</h4>
                       <p className="text-sm text-muted-foreground line-clamp-2">
-                        {note.content}
+                        {htmlToPlainText(note.content)}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(note.updatedAt).toLocaleDateString()}
@@ -183,11 +296,11 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
           </CardContent>
         </Card>
 
-        {generatedContent ? (
-          <Card className="flex flex-col">
-            <CardHeader className="shrink-0 pb-2 py-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Generated Content</CardTitle>
+        <Card className="flex flex-col">
+          <CardHeader className="shrink-0 pb-2 py-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Generated Content</CardTitle>
+              {generatedContent && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -206,20 +319,28 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
                     </>
                   )}
                 </Button>
-              </div>
-              <CardDescription>
-                AI-generated note content — scroll to read. Also saved to Recent Notes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 pb-4 pt-0">
-              <div className="overflow-y-auto rounded-md bg-muted p-3" style={{ height: '220px' }}>
+              )}
+            </div>
+            <CardDescription>
+              {generatedContent
+                ? "AI-generated note content — scroll to read. Also saved to Recent Notes."
+                : "Generate a note with AI using the form on the left."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-6 pb-4 pt-0">
+            <div className="overflow-y-auto rounded-md bg-muted p-3 border border-border/50" style={{ height: '220px' }}>
+              {generatedContent ? (
                 <pre className="whitespace-pre-wrap text-sm font-mono">
                   {generatedContent}
                 </pre>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
+              ) : (
+                <p className="text-sm text-muted-foreground h-full flex items-center justify-center">
+                  The AI generated note will go here
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Notebooks: always next row after the stacked block */}
@@ -232,11 +353,22 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {notesError ? (
+              <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                Couldn’t load notes: {notesError}
+              </div>
+            ) : null}
             {notebooks.length > 0 ? (
               <div className="space-y-4">
                 {notebooks.map((notebook) => {
                   const isImported =
                     notebook.description === 'Imported from GitHub'
+                  const importedFiles = isImported
+                    ? allNotes
+                        .filter((n) => (n.notebookId ?? n.notebook?.id ?? null) === notebook.id)
+                        .map((n) => ({ id: n.id, title: n.title || 'Encrypted' }))
+                        .sort((a, b) => a.title.localeCompare(b.title))
+                    : []
                   return (
                     <div
                       key={notebook.id}
@@ -274,13 +406,17 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
                           )}
                         </Button>
                       </div>
-                      {isImported && notebook.importedNotes.length > 0 ? (
+                      {isImported && notesLoading ? (
+                        <div className="px-3 py-2 text-xs text-muted-foreground border-t">
+                          Loading files…
+                        </div>
+                      ) : isImported && importedFiles.length > 0 ? (
                         <ul className="divide-y border-t bg-background max-h-56 overflow-y-auto">
-                          {notebook.importedNotes.map((file) => (
+                          {importedFiles.map((file) => (
                             <li key={file.id}>
                               <Link
                                 href={`/notes/${file.id}`}
-                                className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/60 transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/60 transition-colors cursor-pointer"
                               >
                                 <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span className="truncate">{file.title}</span>
@@ -288,7 +424,7 @@ export function DashboardGrid({ notes, notebooks }: DashboardGridProps) {
                             </li>
                           ))}
                         </ul>
-                      ) : isImported && notebook.importedNotes.length === 0 ? (
+                      ) : isImported && importedFiles.length === 0 ? (
                         <div className="px-3 py-2 text-xs text-muted-foreground border-t">
                           No files in this import yet
                         </div>
