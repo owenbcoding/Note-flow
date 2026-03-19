@@ -79,7 +79,7 @@ function NavbarUI({
 export function Navbar({ clerkEnabled = true }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   if (!clerkEnabled) {
-    return <NavbarUI showDashboard={true} isOpen={isOpen} setIsOpen={setIsOpen} />;
+    return <NavbarUI showDashboard={false} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
   return <NavbarWithClerk isOpen={isOpen} setIsOpen={setIsOpen} />;
 }
