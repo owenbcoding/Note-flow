@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { NotebookPen, FileText, BookOpen, RefreshCw } from 'lucide-react'
+import { NotebookPen, FileText, BookOpen, RefreshCw, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { DashboardGrid } from '@/components/dashboard/dashboard-grid'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
@@ -65,29 +65,8 @@ export default async function Dashboard() {
 
     const IMPORTED_DESC = 'Imported from GitHub'
 
-    // Notebooks that hold GitHub imports — their notes must not appear in Recent Notes
-    const importedNotebookIds = (
-      await prisma.notebook.findMany({
-        where: { userId: dbUser.id, description: IMPORTED_DESC },
-        select: { id: true },
-      })
-    ).map((n) => n.id)
-
-    // Recent Notes: exclude notes that live only in imported-repo notebooks (those stay in Notebook section only)
-    const notes = await prisma.note.findMany({
-      where: {
-        userId: dbUser.id,
-        ...(importedNotebookIds.length > 0
-          ? {
-              OR: [
-                { notebookId: null },
-                { notebookId: { notIn: importedNotebookIds } },
-              ],
-            }
-          : {}),
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: 5,
+    const noteCount = await prisma.note.count({
+      where: { userId: dbUser.id },
     })
 
     const notebooks = await prisma.notebook.findMany({
@@ -96,41 +75,21 @@ export default async function Dashboard() {
       take: 8,
     })
 
-    // All notes inside imported-repo notebooks — shown only as clickable files under that notebook
-    const importedNotesByNotebook =
-      importedNotebookIds.length > 0
-        ? await prisma.note.findMany({
-            where: { userId: dbUser.id, notebookId: { in: importedNotebookIds } },
-            select: { id: true, title: true, notebookId: true },
-            orderBy: { title: 'asc' },
-          })
-        : []
-
-    const notesByNotebookId = new Map<string, { id: string; title: string }[]>()
-    for (const n of importedNotesByNotebook) {
-      if (!n.notebookId) continue
-      const list = notesByNotebookId.get(n.notebookId) ?? []
-      list.push({ id: n.id, title: n.title })
-      notesByNotebookId.set(n.notebookId, list)
-    }
-
     const notebooksForGrid = notebooks.map((nb) => ({
       id: nb.id,
       title: nb.title,
       description: nb.description,
       color: nb.color,
-      importedNotes:
-        nb.description === IMPORTED_DESC
-          ? (notesByNotebookId.get(nb.id) ?? [])
-          : [],
+      // E2E: notebook file lists are rendered client-side after decryption
+      importedNotes: nb.description === IMPORTED_DESC ? [] : [],
     }))
-      return { notes, notebooksForGrid }
+      return { noteCount, notebooksForGrid }
     })
 
     return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header with Sign out aligned to right edge (above Recent Activity) */}
+        {/* Header with quick links and Sign out */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Welcome back, {user.firstName || 'User'}!</h1>
@@ -138,7 +97,19 @@ export default async function Dashboard() {
               Here&apos;s what&apos;s happening with your notes today.
             </p>
           </div>
-          <div className="sm:shrink-0">
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/notes" className="gap-2">
+                <FileText className="h-4 w-4" />
+                Notes
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/notes/new" className="gap-2">
+                <PlusCircle className="h-4 w-4" />
+                New note
+              </Link>
+            </Button>
             <DashboardHeader />
           </div>
         </div>
@@ -151,7 +122,7 @@ export default async function Dashboard() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.notes.length}</div>
+              <div className="text-2xl font-bold">{data.noteCount}</div>
               <p className="text-xs text-muted-foreground">
                 +2 from last week
               </p>
@@ -185,7 +156,7 @@ export default async function Dashboard() {
           </Card>
         </div>
 
-        <DashboardGrid notes={data.notes} notebooks={data.notebooksForGrid} />
+        <DashboardGrid noteCount={data.noteCount} notebooks={data.notebooksForGrid} />
       </div>
     </div>
     )
@@ -223,7 +194,7 @@ export default async function Dashboard() {
               </CardContent>
             </Card>
 
-            <DashboardGrid notes={[]} notebooks={[]} />
+            <DashboardGrid noteCount={0} notebooks={[]} />
           </div>
         </div>
       )
